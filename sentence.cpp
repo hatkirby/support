@@ -16,7 +16,7 @@ std::string sentence::generate() const
   // Generate the form that the sentence should take.
   std::vector<verbly::token> actions {
     {"like", verbly::token(std::set<std::string>({"infinitive_phrase", "subjectless"}))},
-    {"have", verbly::token(std::set<std::string>({"gerund_phrase", "subjectless"}))}
+    {"have", verbly::token(std::set<std::string>({"gerund_phrase", "subjectless", "past_participle"}))}
   };
 
   verbly::token form = actions[
