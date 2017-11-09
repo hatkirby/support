@@ -226,8 +226,7 @@ verbly::token sentence::generateStandardNounPhrase(
   bool definite) const
 {
   verbly::token utter;
-  verbly::word sounder = noun;
-  verbly::word descript;
+  bool indefiniteArticle = false;
 
   /*if (std::bernoulli_distribution(1.0/8.0)(rng_))
   {
@@ -252,18 +251,8 @@ verbly::token sentence::generateStandardNounPhrase(
     {
       utter << "your";
     } else if (!plural) {
-      if (sounder.getBaseForm().startsWithVowelSound())
-      {
-        utter << "an";
-      } else {
-        utter << "a";
-      }
+      indefiniteArticle = true;
     }
-  }
-
-  if (descript.isValid())
-  {
-    utter << descript;
   }
 
   if (plural && noun.hasInflection(verbly::inflection::plural))
@@ -273,7 +262,12 @@ verbly::token sentence::generateStandardNounPhrase(
     utter << noun;
   }
 
-  return utter;
+  if (indefiniteArticle)
+  {
+    return verbly::token::indefiniteArticle(utter);
+  } else {
+    return utter;
+  }
 }
 
 verbly::token sentence::generateClause(
@@ -446,20 +440,15 @@ verbly::token sentence::generateClause(
           utter << generateClause(sentence);
         } else if (part.nounHasSynrestr("quotation"))
         {
-          verbly::token sentence(std::set<std::string>({"participle_phrase"}));
-          while (!sentence.isComplete())
-          {
-            visit(sentence);
-          }
-
-          utter << ("\"" + sentence.compile() + "\"");
+          utter << verbly::token::quote("\"", "\"",
+            verbly::token(std::set<std::string>({"participle_phrase"})));
         } else {
           if (part.nounHasSynrestr("genitive"))
           {
             verbly::word noun = generateStandardNoun("Passive", {"animate"});
             verbly::token owner = generateStandardNounPhrase(noun, "Passive", false, true);
-            std::string ownerStr = owner.compile() + "'s";
-            utter << ownerStr;
+
+            utter << verbly::token::punctuation("'s", owner);
           }
 
           verbly::word noun = generateStandardNoun(part.getNounRole(), part.getNounSelrestrs());
@@ -665,4 +654,3 @@ void sentence::visit(verbly::token& it) const
     }
   }
 }
-

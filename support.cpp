@@ -18,6 +18,12 @@ int main(int argc, char** argv)
   std::string configfile(argv[1]);
   YAML::Node config = YAML::LoadFile(configfile);
 
+  std::random_device randomDevice;
+  std::mt19937 rng{randomDevice()};
+
+  verbly::database database(config["verbly_datafile"].as<std::string>());
+  sentence generator(database, rng);
+
   twitter::auth auth;
   auth.setConsumerKey(config["consumer_key"].as<std::string>());
   auth.setConsumerSecret(config["consumer_secret"].as<std::string>());
@@ -25,12 +31,6 @@ int main(int argc, char** argv)
   auth.setAccessSecret(config["access_secret"].as<std::string>());
 
   twitter::client client(auth);
-
-  std::random_device randomDevice;
-  std::mt19937 rng{randomDevice()};
-
-  verbly::database database(config["verbly_datafile"].as<std::string>());
-  sentence generator(database, rng);
 
   for (;;)
   {
